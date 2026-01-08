@@ -1,0 +1,3 @@
+#!/bin/bash
+# Convenience wrapper for postgres setup
+uv run python src/postgres_setup/setup.py "$@"
