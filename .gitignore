@@ -27,3 +27,4 @@ init-scripts/
 
 # Local environment files
 .env.local
+/docker-compose.yml

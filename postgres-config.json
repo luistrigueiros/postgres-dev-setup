@@ -1,0 +1,14 @@
+{
+  "image": "postgres:16",
+  "user": "devuser",
+  "password": "devpass",
+  "database": "devdb",
+  "port": 5432,
+  "extensions": [
+    "vector",
+    "pg_trgm",
+    "btree_gin",
+    "btree_gist"
+  ],
+  "custom_types": []
+}

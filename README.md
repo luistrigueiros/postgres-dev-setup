@@ -163,6 +163,41 @@ docker ps -a     # Check container status
 ./pgctl start
 ```
 
+### Test the Setup
+Step 9: Test the Setup
+bash# Run the setup
+uv run python src/postgres_setup/setup.py setup
+
+# Start PostgreSQL
+uv run python src/postgres_setup/setup.py start
+
+# Check status
+uv run python src/postgres_setup/setup.py status
+
+# Connect to database
+uv run python src/postgres_setup/setup.py psql
+Inside psql, test:
+sql-- List extensions
+\dx
+
+-- Check version
+SELECT version();
+
+-- Exit
+\q
+
+### Quick Diagnosis
+First, let's check if PostgreSQL is actually accessible:
+bash# Test 1: Check if port is listening
+lsof -i :5432
+
+# Test 2: Try connecting with psql from your Mac (not Docker)
+# Install postgresql client if needed: brew install postgresql
+psql -h localhost -p 5432 -U devuser -d devdb
+
+# Test 3: Test with netcat
+nc -zv localhost 5432
+
 ## Contributing
 
 This is a template - customize it for your needs! Common customizations:
@@ -171,6 +206,7 @@ This is a template - customize it for your needs! Common customizations:
 - Include backup/restore scripts
 - Add monitoring (pgAdmin, pg_stat_statements)
 - Configure replication for testing
+
 
 ## License
 
