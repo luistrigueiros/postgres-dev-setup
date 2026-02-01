@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch, mock_open
 from argparse import Namespace
-from pathlib import Path
 
 from postgres_setup.commands.status import StatusCommand
 from postgres_setup.commands.start import StartCommand
@@ -39,7 +38,7 @@ def test_status_command(mock_run_command):
 def test_stop_command(mock_run_command):
     cmd = StopCommand()
     cmd.run(Namespace())
-    mock_run_command.assert_called_with(["docker-compose", "down"])
+    mock_run_command.assert_called_with(["docker-compose", "down"], use_build_root=True)
 
 def test_start_command(mock_run_command, mock_config_load, mock_config_exists):
     with patch("time.sleep", return_value=None):
@@ -48,7 +47,8 @@ def test_start_command(mock_run_command, mock_config_load, mock_config_exists):
         mock_run_command.side_effect = [(True, ""), (True, ""), (True, "")]
         cmd.run(Namespace())
         assert mock_run_command.call_count >= 3
-        assert mock_run_command.call_args_list[0][0][0] == ["docker-compose", "up", "-d"]
+        assert mock_run_command.call_args_list[0].args[0] == ["docker-compose", "up", "-d"]
+        assert mock_run_command.call_args_list[0].kwargs["use_build_root"] is True
 
 def test_restart_command(mock_run_command, mock_config_load, mock_config_exists):
     with patch("time.sleep", return_value=None):
@@ -57,14 +57,16 @@ def test_restart_command(mock_run_command, mock_config_load, mock_config_exists)
         mock_run_command.side_effect = [(True, ""), (True, ""), (True, ""), (True, "")]
         cmd.run(Namespace())
         assert mock_run_command.call_count >= 4
-        assert mock_run_command.call_args_list[0][0][0] == ["docker-compose", "down"]
-        assert mock_run_command.call_args_list[1][0][0] == ["docker-compose", "up", "-d"]
+        assert mock_run_command.call_args_list[0].args[0] == ["docker-compose", "down"]
+        assert mock_run_command.call_args_list[0].kwargs["use_build_root"] is True
+        assert mock_run_command.call_args_list[1].args[0] == ["docker-compose", "up", "-d"]
+        assert mock_run_command.call_args_list[1].kwargs["use_build_root"] is True
 
 def test_destroy_command_confirmed(mock_run_command):
     with patch("builtins.input", return_value="yes"):
         cmd = DestroyCommand()
         cmd.run(Namespace())
-        mock_run_command.assert_called_with(["docker-compose", "down", "-v"])
+        mock_run_command.assert_called_with(["docker-compose", "down", "-v"], use_build_root=True)
 
 def test_destroy_command_aborted(mock_run_command):
     with patch("builtins.input", return_value="no"):
@@ -84,7 +86,7 @@ def test_info_command(mock_config_load, mock_config_exists):
 def test_logs_command(mock_run_command):
     cmd = LogsCommand()
     cmd.run(Namespace())
-    mock_run_command.assert_called_with(["docker-compose", "logs", "-f", "postgres"], capture_output=False)
+    mock_run_command.assert_called_with(["docker-compose", "logs", "-f", "postgres"], capture_output=False, use_build_root=True)
 
 def test_psql_command(mock_run_command, mock_config_load, mock_config_exists):
     cmd = PsqlCommand()

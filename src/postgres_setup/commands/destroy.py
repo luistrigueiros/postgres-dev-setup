@@ -15,7 +15,7 @@ class DestroyCommand(Command):
             return
 
         print("💥 Destroying PostgreSQL (including data)...")
-        success, output = self.run_command(["docker-compose", "down", "-v"])
+        success, output = self.run_command(["docker-compose", "down", "-v"], use_build_root=True)
 
         if success:
             print("✓ PostgreSQL destroyed (all data removed)")

@@ -11,8 +11,11 @@ class Command:
         self.name = name
         self.description = description
 
-        self.project_root = Path(__file__).parent.parent.parent
-        self.config_file = self.project_root / "config" / "postgres-config.json"
+        # project_root is the root of the repository
+        self.project_root = Path(__file__).parent.parent.parent.parent
+        # build_root is where generated files go
+        self.build_root = self.project_root / "build"
+        self.config_file = self.build_root / "config" / "postgres-config.json"
 
     def default_config(self) -> dict:
         """Default PostgreSQL configuration"""
@@ -40,8 +43,14 @@ class Command:
         with open(self.config_file) as f:
             return json.load(f)
 
-    def run_command(self, cmd: list[str], capture_output: bool = True) -> tuple[bool, str]:
+    def run_command(self, cmd: list[str], capture_output: bool = True, use_build_root: bool = False) -> tuple[bool, str]:
         """Execute shell command and return success status and output"""
+        cwd = self.build_root if use_build_root else self.project_root
+        
+        # Ensure directory exists if we're using it as CWD
+        if use_build_root:
+            cwd.mkdir(parents=True, exist_ok=True)
+
         try:
             if capture_output:
                 result = subprocess.run(
@@ -49,11 +58,11 @@ class Command:
                     capture_output=True,
                     text=True,
                     check=True,
-                    cwd=self.project_root,
+                    cwd=cwd,
                 )
                 return True, result.stdout
 
-            subprocess.run(cmd, check=True, cwd=self.project_root)
+            subprocess.run(cmd, check=True, cwd=cwd)
             return True, ""
         except subprocess.CalledProcessError as e:
             return False, e.stderr if capture_output else str(e)
