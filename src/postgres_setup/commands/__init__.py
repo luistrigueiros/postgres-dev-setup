@@ -1,5 +1,6 @@
 import json
 import subprocess
+import time
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
@@ -140,6 +141,27 @@ def show_extensions():
     if success:
         print("\n📦 Installed Extensions:")
         print(output)
+
+def handle_successful_start():
+    """Handle successful container start by waiting for PostgreSQL to be ready"""
+    print("✓ PostgreSQL container started")
+    print("\n⏳ Waiting for PostgreSQL to be healthy...")
+
+    config = load_config()
+    for i in range(30):
+        time.sleep(1)
+        success, _ = run_shell_command([
+            "docker", "exec", config['container_name'],
+            "pg_isready", "-U", config['user']
+        ])
+        if success:
+            print("✅ PostgreSQL is ready!")
+            show_connection_info()
+            show_extensions()
+            return
+        print(".", end="", flush=True)
+
+    print("\n⚠️  PostgreSQL may still be starting. Check with: pgctl logs")
 
 from . import destroy as destroy  # noqa: E402
 from . import info as info  # noqa: E402
