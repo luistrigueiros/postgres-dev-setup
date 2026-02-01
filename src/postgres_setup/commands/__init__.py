@@ -3,7 +3,6 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 class Command:
     """Base class for commands."""
