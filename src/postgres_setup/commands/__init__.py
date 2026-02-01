@@ -1,10 +1,13 @@
 import json
 import subprocess
 import time
+from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Tuple
 
 import typer
+
+from ..domain import PostgresConfig
 
 app = typer.Typer(
     help="PostgreSQL Development Environment Manager",
@@ -42,38 +45,35 @@ def get_build_root() -> Path:
         return PROJECT_ROOT / "build" / "DEFAULT"
     return PROJECT_ROOT / "build" / instance
 
-def get_config_file() -> Path:
+def get_config_file_path() -> Path:
     """Return the configuration file path for the current instance"""
     return get_build_root() / "config" / "postgres-config.json"
 
-def get_default_config() -> Dict[str, Any]:
+def get_default_config() -> PostgresConfig:
     """Default PostgreSQL configuration"""
     instance = get_instance_name()
     container_name = "dev-postgres" if instance == DEFAULT_INSTANCE else f"dev-postgres-{instance}"
-    return {
-        "image": "postgres:16",
-        "user": "devuser",
-        "password": "devpass",
-        "database": "devdb",
-        "port": 5432,
-        "extensions": [
-            "pg_trgm",  # Text search
-            "btree_gin",  # Additional index types
-            "btree_gist",  # Additional index types
-            "pgcrypto",  # Cryptographic functions
-        ],
-        "custom_types": [],
-        "container_name": container_name,
-    }
+    return PostgresConfig(container_name=container_name)
 
-def load_config() -> Dict[str, Any]:
+@lru_cache(maxsize=None)
+def get_config() -> PostgresConfig:
+    """Shared immutable instance of the configuration"""
+    return load_config()
+
+def load_config() -> PostgresConfig:
     """Load PostgreSQL configuration from JSON file"""
-    config_file = get_config_file()
+    config_file = get_config_file_path()
     if not config_file.exists():
         return get_default_config()
 
-    with open(config_file) as f:
-        return json.load(f)
+    try:
+        with open(config_file) as f:
+            data = json.load(f)
+            return PostgresConfig(**data)
+    except (json.JSONDecodeError, TypeError, ValueError) as e:
+        # Fallback to default if config is invalid, but maybe should raise in production
+        print(f"⚠️ Warning: Failed to load config from {config_file}: {e}. Using defaults.")
+        return get_default_config()
 
 def run_shell_command(
     cmd: list[str], capture_output: bool = True, use_build_root: bool = False
@@ -104,35 +104,35 @@ def run_shell_command(
 
 def show_connection_info():
     """Display connection information"""
-    config = load_config()
+    config = get_config()
     instance = get_instance_name()
     print("\n" + "=" * 60)
     print(f"📋 Connection Information (Instance: {instance})")
     print("=" * 60)
     print("  Host:     localhost")
-    print(f"  Port:     {config['port']}")
-    print(f"  Database: {config['database']}")
-    print(f"  User:     {config['user']}")
-    print(f"  Password: {config['password']}")
+    print(f"  Port:     {config.port}")
+    print(f"  Database: {config.database}")
+    print(f"  User:     {config.user}")
+    print(f"  Password: {config.password}")
     print("\n  Connection URI:")
     print(
-        f"  postgresql://{config['user']}:{config['password']}@localhost:{config['port']}/{config['database']}"
+        f"  postgresql://{config.user}:{config.password}@localhost:{config.port}/{config.database}"
     )
     print("=" * 60)
 
 def show_extensions():
     """Show installed extensions"""
-    config = load_config()
+    config = get_config()
     success, output = run_shell_command(
         [
             "docker",
             "exec",
-            config["container_name"],
+            config.container_name,
             "psql",
             "-U",
-            config["user"],
+            config.user,
             "-d",
-            config["database"],
+            config.database,
             "-c",
             "SELECT extname, extversion FROM pg_extension ORDER BY extname;",
         ]
@@ -147,12 +147,12 @@ def handle_successful_start():
     print("✓ PostgreSQL container started")
     print("\n⏳ Waiting for PostgreSQL to be healthy...")
 
-    config = load_config()
+    config = get_config()
     for i in range(30):
         time.sleep(1)
         success, _ = run_shell_command([
-            "docker", "exec", config['container_name'],
-            "pg_isready", "-U", config['user']
+            "docker", "exec", config.container_name,
+            "pg_isready", "-U", config.user
         ])
         if success:
             print("✅ PostgreSQL is ready!")
