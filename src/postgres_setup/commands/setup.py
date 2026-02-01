@@ -15,17 +15,17 @@ class SetupCommand(Command):
         with open(config_file, "w") as f:
             json.dump(config, indent=2, fp=f)
 
-    def _generate_docker_compose(self, project_root: Path, config: dict) -> None:
+    def _generate_docker_compose(self, build_root: Path, config: dict) -> None:
         """Generate docker-compose.yml from config"""
-        compose_file = project_root / "docker-compose.yml"
+        compose_file = build_root / "docker-compose.yml"
         compose_content = f"""version: '3.8'\n\nservices:\n  postgres:\n    image: {config['image']}\n    container_name: {config['container_name']}\n    environment:\n      POSTGRES_USER: {config['user']}\n      POSTGRES_PASSWORD: {config['password']}\n      POSTGRES_DB: {config['database']}\n      # Performance tuning for development\n      POSTGRES_INITDB_ARGS: \"-E UTF8 --locale=en_US.UTF-8\"\n    ports:\n      - \"{config['port']}:5432\"\n    volumes:\n      - postgres_data:/var/lib/postgresql/data\n      - ./init-scripts:/docker-entrypoint-initdb.d:ro\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U {config['user']}\"]\n      interval: 10s\n      timeout: 5s\n      retries: 5\n    networks:\n      - postgres_network\n\nvolumes:\n  postgres_data:\n    driver: local\n\nnetworks:\n  postgres_network:\n    driver: bridge\n"""
         compose_file.write_text(compose_content)
         print(f"✓ Generated {compose_file.name}")
 
-    def _generate_init_scripts(self, project_root: Path, config: dict) -> None:
+    def _generate_init_scripts(self, build_root: Path, config: dict) -> None:
         """Generate initialization SQL scripts"""
-        init_scripts_dir = project_root / "init-scripts"
-        init_scripts_dir.mkdir(exist_ok=True)
+        init_scripts_dir = build_root / "init-scripts"
+        init_scripts_dir.mkdir(parents=True, exist_ok=True)
 
         # Extensions script
         extensions_sql = """-- Install PostgreSQL extensions
@@ -73,13 +73,13 @@ class SetupCommand(Command):
         self._save_config(self.config_file, config)
         print(f"✓ Configuration saved to {self.config_file}")
 
-        self._generate_docker_compose(self.project_root, config)
-        self._generate_init_scripts(self.project_root, config)
+        self._generate_docker_compose(self.build_root, config)
+        self._generate_init_scripts(self.build_root, config)
 
         print("\n" + "=" * 60)
         print("✅ Setup complete!")
         print("=" * 60)
         print("\nNext steps:")
-        print("  1. Review config/postgres-config.json to customize")
+        print("  1. Review build/config/postgres-config.json to customize")
         print("  2. Run: uv run python src/postgres_setup/setup.py start")
         print("  3. Connect with: uv run python src/postgres_setup/setup.py psql")

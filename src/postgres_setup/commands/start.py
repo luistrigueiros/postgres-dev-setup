@@ -13,7 +13,7 @@ class StartCommand(Command):
         """Start PostgreSQL container"""
         print("🐘 Starting PostgreSQL...")
 
-        success, output = self.run_command(["docker-compose", "up", "-d"])
+        success, output = self.run_command(["docker-compose", "up", "-d"], use_build_root=True)
 
         if success:
             print("✓ PostgreSQL container started")

@@ -13,6 +13,7 @@ venv/
 docker-compose.override.yml
 
 # Generated files
+build/
 init-scripts/
 
 # IDE
@@ -27,4 +28,4 @@ init-scripts/
 
 # Local environment files
 .env.local
-/docker-compose.yml
+src/postgres_dev_setup.egg-info
