@@ -26,10 +26,10 @@ def test_postgres_config_validation():
 def test_postgres_config_immutability():
     config = PostgresConfig()
     with pytest.raises(AttributeError):
-        config.port = 5433
+        config.port = 5433  # type: ignore
 
 def test_postgres_config_extra_ignored():
-    config = PostgresConfig(extra_field="ignored")
+    config = PostgresConfig(extra_field="ignored")  # type: ignore
     assert not hasattr(config, "extra_field")
 
 def test_postgres_config_to_dict():
