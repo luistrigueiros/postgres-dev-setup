@@ -1,7 +1,6 @@
 
 from argparse import Namespace
-from postgres_setup.commands import Command
-from postgres_setup.core import PostgresDevSetup
+from . import Command
 
 
 class InfoCommand(Command):
@@ -10,5 +9,4 @@ class InfoCommand(Command):
 
     def run(self, args: Namespace):
         """Display connection information"""
-        setup = PostgresDevSetup()
-        setup.show_connection_info()
+        self.show_connection_info()
