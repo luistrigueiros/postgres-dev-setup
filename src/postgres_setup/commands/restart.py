@@ -1,6 +1,7 @@
 
 import time
 from argparse import Namespace
+
 from . import Command
 
 
@@ -11,13 +12,13 @@ class RestartCommand(Command):
     def run(self, args: Namespace):
         """Restart PostgreSQL container"""
         print("🔄 Restarting PostgreSQL...")
-        
+
         # Stop the container
         stop_success, stop_output = self.run_command(["docker-compose", "down"], use_build_root=True)
         if not stop_success:
             print(f"❌ Failed to stop: {stop_output}")
             return
-        
+
         print("✓ PostgreSQL stopped")
         time.sleep(2)
 
@@ -26,7 +27,7 @@ class RestartCommand(Command):
         if not start_success:
             print(f"❌ Failed to start: {start_output}")
             return
-            
+
         print("✓ PostgreSQL container started")
         print("\n⏳ Waiting for PostgreSQL to be healthy...")
 

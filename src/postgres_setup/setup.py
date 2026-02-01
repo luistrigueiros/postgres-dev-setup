@@ -14,7 +14,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from postgres_setup import commands
+from postgres_setup import commands  # noqa: E402
+
 
 def main():
     """Main entry point for the script."""
@@ -32,7 +33,7 @@ def main():
                 command_class = getattr(module, attr)
                 command_instance = command_class()
                 command_map[command_instance.name] = command_instance
-                
+
                 # Add subcommand parser
                 cmd_parser = subparsers.add_parser(
                     command_instance.name,

@@ -1,6 +1,6 @@
+import json
 from argparse import Namespace
 from pathlib import Path
-import json
 
 from . import Command
 
@@ -18,7 +18,37 @@ class SetupCommand(Command):
     def _generate_docker_compose(self, build_root: Path, config: dict) -> None:
         """Generate docker-compose.yml from config"""
         compose_file = build_root / "docker-compose.yml"
-        compose_content = f"""version: '3.8'\n\nservices:\n  postgres:\n    image: {config['image']}\n    container_name: {config['container_name']}\n    environment:\n      POSTGRES_USER: {config['user']}\n      POSTGRES_PASSWORD: {config['password']}\n      POSTGRES_DB: {config['database']}\n      # Performance tuning for development\n      POSTGRES_INITDB_ARGS: \"-E UTF8 --locale=en_US.UTF-8\"\n    ports:\n      - \"{config['port']}:5432\"\n    volumes:\n      - postgres_data:/var/lib/postgresql/data\n      - ./init-scripts:/docker-entrypoint-initdb.d:ro\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U {config['user']}\"]\n      interval: 10s\n      timeout: 5s\n      retries: 5\n    networks:\n      - postgres_network\n\nvolumes:\n  postgres_data:\n    driver: local\n\nnetworks:\n  postgres_network:\n    driver: bridge\n"""
+        compose_content = (
+            f"version: '3.8'\\n\\n"
+            f"services:\\n"
+            f"  postgres:\\n"
+            f"    image: {config['image']}\\n"
+            f"    container_name: {config['container_name']}\\n"
+            f"    environment:\\n"
+            f"      POSTGRES_USER: {config['user']}\\n"
+            f"      POSTGRES_PASSWORD: {config['password']}\\n"
+            f"      POSTGRES_DB: {config['database']}\\n"
+            f"      # Performance tuning for development\\n"
+            f"      POSTGRES_INITDB_ARGS: '-E UTF8 --locale=en_US.UTF-8'\\n"
+            f"    ports:\\n"
+            f"      - '{config['port']}:5432'\\n"
+            f"    volumes:\\n"
+            f"      - postgres_data:/var/lib/postgresql/data\\n"
+            f"      - ./init-scripts:/docker-entrypoint-initdb.d:ro\\n"
+            f"    healthcheck:\\n"
+            f"      test: ['CMD-SHELL', 'pg_isready -U {config['user']}']\\n"
+            f"      interval: 10s\\n"
+            f"      timeout: 5s\\n"
+            f"      retries: 5\\n"
+            f"    networks:\\n"
+            f"      - postgres_network\\n\\n"
+            f"volumes:\\n"
+            f"  postgres_data:\\n"
+            f"    driver: local\\n\\n"
+            f"networks:\\n"
+            f"  postgres_network:\\n"
+            f"    driver: bridge\\n"
+        )
         compose_file.write_text(compose_content)
         print(f"✓ Generated {compose_file.name}")
 

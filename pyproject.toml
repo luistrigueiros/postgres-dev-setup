@@ -9,6 +9,8 @@ dependencies = []
 dev = [
     "pytest>=8.0.0",
     "pytest-mock>=3.12.0",
+    "ruff>=0.5.0",
+    "pyright>=1.1.370",
 ]
 
 [build-system]
@@ -18,3 +20,19 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pyright]
+include = ["src", "tests"]
+exclude = ["**/__pycache__"]
+typeCheckingMode = "basic"
+reportMissingImports = "warning"
+reportMissingTypeStubs = "none"
