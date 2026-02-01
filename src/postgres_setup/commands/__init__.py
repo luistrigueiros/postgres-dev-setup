@@ -4,6 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
+
 class Command:
     """Base class for commands."""
 
@@ -17,7 +18,8 @@ class Command:
         self.build_root = self.project_root / "build"
         self.config_file = self.build_root / "config" / "postgres-config.json"
 
-    def default_config(self) -> dict:
+    @staticmethod
+    def default_config() -> dict:
         """Default PostgreSQL configuration"""
         return {
             "image": "postgres:16",
@@ -43,10 +45,12 @@ class Command:
         with open(self.config_file) as f:
             return json.load(f)
 
-    def run_command(self, cmd: list[str], capture_output: bool = True, use_build_root: bool = False) -> tuple[bool, str]:
+    def run_command(
+        self, cmd: list[str], capture_output: bool = True, use_build_root: bool = False
+    ) -> tuple[bool, str]:
         """Execute shell command and return success status and output"""
         cwd = self.build_root if use_build_root else self.project_root
-        
+
         # Ensure directory exists if we're using it as CWD
         if use_build_root:
             cwd.mkdir(parents=True, exist_ok=True)

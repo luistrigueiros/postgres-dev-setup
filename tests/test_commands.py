@@ -1,16 +1,18 @@
-import pytest
-from unittest.mock import MagicMock, patch, mock_open
 from argparse import Namespace
+from unittest.mock import mock_open, patch
 
-from postgres_setup.commands.status import StatusCommand
-from postgres_setup.commands.start import StartCommand
-from postgres_setup.commands.stop import StopCommand
-from postgres_setup.commands.restart import RestartCommand
+import pytest
+
 from postgres_setup.commands.destroy import DestroyCommand
 from postgres_setup.commands.info import InfoCommand
 from postgres_setup.commands.logs import LogsCommand
 from postgres_setup.commands.psql import PsqlCommand
+from postgres_setup.commands.restart import RestartCommand
 from postgres_setup.commands.setup import SetupCommand
+from postgres_setup.commands.start import StartCommand
+from postgres_setup.commands.status import StatusCommand
+from postgres_setup.commands.stop import StopCommand
+
 
 @pytest.fixture
 def mock_run_command():
@@ -26,7 +28,11 @@ def mock_config_exists():
 
 @pytest.fixture
 def mock_config_load():
-    with patch("builtins.open", mock_open(read_data='{"port": 5432, "database": "devdb", "user": "devuser", "password": "devpass", "container_name": "dev-postgres", "extensions": ["pg_trgm"]}')):
+    read_data = (
+        '{"port": 5432, "database": "devdb", "user": "devuser", '
+        '"password": "devpass", "container_name": "dev-postgres", "extensions": ["pg_trgm"]}'
+    )
+    with patch("builtins.open", mock_open(read_data=read_data)):
         yield
 
 def test_status_command(mock_run_command):
@@ -86,7 +92,9 @@ def test_info_command(mock_config_load, mock_config_exists):
 def test_logs_command(mock_run_command):
     cmd = LogsCommand()
     cmd.run(Namespace())
-    mock_run_command.assert_called_with(["docker-compose", "logs", "-f", "postgres"], capture_output=False, use_build_root=True)
+    mock_run_command.assert_called_with(
+        ["docker-compose", "logs", "-f", "postgres"], capture_output=False, use_build_root=True
+    )
 
 def test_psql_command(mock_run_command, mock_config_load, mock_config_exists):
     cmd = PsqlCommand()
@@ -95,7 +103,11 @@ def test_psql_command(mock_run_command, mock_config_load, mock_config_exists):
     assert mock_run_command.call_args[1]["capture_output"] is False
 
 def test_setup_command(mock_config_exists):
-    config_data = '{"image": "postgres:16", "port": 5432, "database": "devdb", "user": "devuser", "password": "devpass", "container_name": "dev-postgres", "extensions": ["pg_trgm"], "custom_types": []}'
+    config_data = (
+        '{"image": "postgres:16", "port": 5432, "database": "devdb", "user": "devuser", '
+        '"password": "devpass", "container_name": "dev-postgres", '
+        '"extensions": ["pg_trgm"], "custom_types": []}'
+    )
     with patch("pathlib.Path.mkdir"), \
          patch("pathlib.Path.write_text"), \
          patch("builtins.open", mock_open(read_data=config_data)):
