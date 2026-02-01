@@ -2,8 +2,7 @@ from argparse import Namespace
 from pathlib import Path
 import json
 
-from postgres_setup.commands import Command
-from postgres_setup.core import PostgresDevSetup
+from . import Command
 
 
 class SetupCommand(Command):
@@ -68,15 +67,14 @@ class SetupCommand(Command):
 
     def run(self, args: Namespace):
         """Initialize the development environment"""
-        setup = PostgresDevSetup()
         print("🚀 Setting up PostgreSQL development environment\n")
 
-        config = setup.load_config()
-        self._save_config(setup.config_file, config)
-        print(f"✓ Configuration saved to {setup.config_file}")
+        config = self.load_config()
+        self._save_config(self.config_file, config)
+        print(f"✓ Configuration saved to {self.config_file}")
 
-        self._generate_docker_compose(setup.project_root, config)
-        self._generate_init_scripts(setup.project_root, config)
+        self._generate_docker_compose(self.project_root, config)
+        self._generate_init_scripts(self.project_root, config)
 
         print("\n" + "=" * 60)
         print("✅ Setup complete!")

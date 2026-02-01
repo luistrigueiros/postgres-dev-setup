@@ -2,8 +2,7 @@
 import sys
 import time
 from argparse import Namespace
-from postgres_setup.commands import Command
-from postgres_setup.core import PostgresDevSetup
+from . import Command
 
 
 class StartCommand(Command):
@@ -12,26 +11,25 @@ class StartCommand(Command):
 
     def run(self, args: Namespace):
         """Start PostgreSQL container"""
-        setup = PostgresDevSetup()
         print("🐘 Starting PostgreSQL...")
 
-        success, output = setup.run_command(["docker-compose", "up", "-d"])
+        success, output = self.run_command(["docker-compose", "up", "-d"])
 
         if success:
             print("✓ PostgreSQL container started")
             print("\n⏳ Waiting for PostgreSQL to be healthy...")
 
-            config = setup.load_config()
+            config = self.load_config()
             for i in range(30):
                 time.sleep(1)
-                success, _ = setup.run_command([
+                success, _ = self.run_command([
                     "docker", "exec", config['container_name'],
                     "pg_isready", "-U", config['user']
                 ])
                 if success:
                     print("✅ PostgreSQL is ready!")
-                    setup.show_connection_info()
-                    setup.show_extensions()
+                    self.show_connection_info()
+                    self.show_extensions()
                     return
                 print(".", end="", flush=True)
 

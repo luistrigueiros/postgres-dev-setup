@@ -1,7 +1,6 @@
 
 from argparse import Namespace
-from postgres_setup.commands import Command
-from postgres_setup.core import PostgresDevSetup
+from . import Command
 
 
 class DestroyCommand(Command):
@@ -10,14 +9,13 @@ class DestroyCommand(Command):
 
     def run(self, args: Namespace):
         """Stop and remove all data"""
-        setup = PostgresDevSetup()
         confirm = input("⚠️  This will DELETE ALL DATA. Type 'yes' to confirm: ")
         if confirm.lower() != 'yes':
             print("❌ Aborted")
             return
 
         print("💥 Destroying PostgreSQL (including data)...")
-        success, output = setup.run_command(["docker-compose", "down", "-v"])
+        success, output = self.run_command(["docker-compose", "down", "-v"])
 
         if success:
             print("✓ PostgreSQL destroyed (all data removed)")

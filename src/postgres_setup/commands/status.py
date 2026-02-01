@@ -1,6 +1,5 @@
 from argparse import Namespace
-from postgres_setup.commands import Command
-from postgres_setup.core import PostgresDevSetup
+from . import Command
 
 
 class StatusCommand(Command):
@@ -9,9 +8,8 @@ class StatusCommand(Command):
 
     def run(self, args: Namespace):
         """Show status of PostgreSQL container"""
-        setup = PostgresDevSetup()
         print("📊 PostgreSQL Status\n")
-        success, output = setup.run_command([
+        success, output = self.run_command([
             "docker", "ps", "-a",
             "--filter", "name=dev-postgres",
             "--format", "table {{.Names}}\t{{.Status}}\t{{.Ports}}"

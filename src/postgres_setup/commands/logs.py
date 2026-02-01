@@ -1,6 +1,5 @@
 from argparse import Namespace
-from postgres_setup.commands import Command
-from postgres_setup.core import PostgresDevSetup
+from . import Command
 
 
 class LogsCommand(Command):
@@ -9,6 +8,5 @@ class LogsCommand(Command):
 
     def run(self, args: Namespace):
         """Show PostgreSQL logs"""
-        setup = PostgresDevSetup()
         print("📜 Showing PostgreSQL logs (Ctrl+C to exit)...\n")
-        setup.run_command(["docker-compose", "logs", "-f", "postgres"], capture_output=False)
+        self.run_command(["docker-compose", "logs", "-f", "postgres"], capture_output=False)
