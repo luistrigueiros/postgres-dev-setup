@@ -10,6 +10,7 @@ Automated PostgreSQL setup for local development with Docker, Python, and UV.
 - 🚀 Automated setup and teardown
 - 📦 Version-controlled configuration
 - 🔄 Easy backup and restore workflows
+- 👯 Multi-instance support (run multiple isolated DBs)
 
 ## Quick Start
 ```bash
@@ -47,6 +48,7 @@ Or use the convenience wrapper:
 | `psql` | Connect with psql client |
 | `status` | Show container status |
 | `info` | Display connection information |
+| `--pg-instance` | Global option to specify instance name (e.g., `--pg-instance analytics`) |
 
 ## Configuration
 
@@ -98,21 +100,23 @@ See [Configuration Guide](docs/CONFIGURATION.md) for details.
 ./pgctl logs     # View logs
 ```
 
-## Project Structure
+## Multi-Instance Support
 
-.
-├── config/
-│   └── postgres-config.json    # Main configuration
-├── src/
-│   └── postgres_setup/
-│       ├── init.py
-│       └── setup.py            # Main script
-├── init-scripts/               # Generated SQL (gitignored)
-├── docs/
-│   └── CONFIGURATION.md        # Detailed config docs
-├── docker-compose.yml          # Generated Docker config
-├── pgctl                       # Convenience wrapper
-└── README.md
+You can run multiple isolated PostgreSQL instances by using the `--pg-instance` (or `-pgi`) option. Each instance has its own configuration and data.
+
+```bash
+# Setup and start a separate instance named 'analytics'
+./pgctl --pg-instance analytics setup
+./pgctl --pg-instance analytics start
+
+# Check status of the analytics instance
+./pgctl -pgi analytics status
+
+# Connect to the analytics instance
+./pgctl -pgi analytics psql
+```
+
+Instances are stored in the `build/` directory (e.g., `build/analytics/`).
 
 ## Connection Details
 
@@ -175,9 +179,15 @@ uv run python src/postgres_setup/setup.py start
 uv run python src/postgres_setup/setup.py status
 
 # Connect to database
+
+```bash
 uv run python src/postgres_setup/setup.py psql
-Inside psql, test:
-sql-- List extensions
+```
+
+Inside psql, issue test commands, list extensions
+
+```bash
+
 \dx
 
 -- Check version
@@ -185,27 +195,28 @@ SELECT version();
 
 -- Exit
 \q
+```
 
-### Quick Diagnosis
+# Quick Diagnosis
 First, let's check if PostgreSQL is actually accessible:
-bash# Test 1: Check if port is listening
+
+## Test 1: Check if port is listening
+```bash
 lsof -i :5432
+```
 
-# Test 2: Try connecting with psql from your Mac (not Docker)
-# Install postgresql client if needed: brew install postgresql
+## Test 2: Try connecting with psql from your Mac (not Docker)
+
+Install postgresql client if needed: 
+```bash
+brew install postgresql
 psql -h localhost -p 5432 -U devuser -d devdb
+```
 
-# Test 3: Test with netcat
+## Test 3: Test with netcat
+```bash
 nc -zv localhost 5432
-
-## Contributing
-
-This is a template - customize it for your needs! Common customizations:
-
-- Add migration tools (Alembic, Flyway)
-- Include backup/restore scripts
-- Add monitoring (pgAdmin, pg_stat_statements)
-- Configure replication for testing
+```
 
 
 ## License
