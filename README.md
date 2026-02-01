@@ -19,13 +19,13 @@ brew install docker
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # 2. Initialize environment
-uv run python src/postgres_setup/setup.py setup
+uv run python src/postgres_setup/main.py setup
 
 # 3. Start PostgreSQL
-uv run python src/postgres_setup/setup.py start
+uv run python src/postgres_setup/main.py start
 
 # 4. Connect to database
-uv run python src/postgres_setup/setup.py psql
+uv run python src/postgres_setup/main.py psql
 ```
 
 Or use the convenience wrapper:
