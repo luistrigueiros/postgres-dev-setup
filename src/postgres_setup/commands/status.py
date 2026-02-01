@@ -1,22 +1,17 @@
-from argparse import Namespace
-
-from . import Command
+from . import app, run_shell_command
 
 
-class StatusCommand(Command):
-    def __init__(self):
-        super().__init__("status", "Show container status")
+@app.command()
+def status():
+    """Show status of PostgreSQL container"""
+    print("📊 PostgreSQL Status\n")
+    success, output = run_shell_command([
+        "docker", "ps", "-a",
+        "--filter", "name=dev-postgres",
+        "--format", "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+    ])
 
-    def run(self, args: Namespace):
-        """Show status of PostgreSQL container"""
-        print("📊 PostgreSQL Status\n")
-        success, output = self.run_command([
-            "docker", "ps", "-a",
-            "--filter", "name=dev-postgres",
-            "--format", "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-        ])
-
-        if success:
-            print(output)
-        else:
-            print("❌ Could not check status")
+    if success:
+        print(output)
+    else:
+        print("❌ Could not check status")

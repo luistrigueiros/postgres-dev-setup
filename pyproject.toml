@@ -3,7 +3,9 @@ name = "postgres-dev-setup"
 version = "0.1.0"
 description = "PostgreSQL Development Environment Manager"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "typer>=0.21.1",
+]
 
 [dependency-groups]
 dev = [

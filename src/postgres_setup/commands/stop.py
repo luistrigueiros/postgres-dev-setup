@@ -1,19 +1,13 @@
-
-from argparse import Namespace
-
-from . import Command
+from . import app, run_shell_command
 
 
-class StopCommand(Command):
-    def __init__(self):
-        super().__init__("stop", "Stop PostgreSQL container")
+@app.command()
+def stop():
+    """Stop PostgreSQL container"""
+    print("🛑 Stopping PostgreSQL...")
+    success, output = run_shell_command(["docker-compose", "down"], use_build_root=True)
 
-    def run(self, args: Namespace):
-        """Stop PostgreSQL container"""
-        print("🛑 Stopping PostgreSQL...")
-        success, output = self.run_command(["docker-compose", "down"], use_build_root=True)
-
-        if success:
-            print("✓ PostgreSQL stopped (data preserved)")
-        else:
-            print(f"❌ Failed to stop: {output}")
+    if success:
+        print("✓ PostgreSQL stopped (data preserved)")
+    else:
+        print(f"❌ Failed to stop: {output}")
