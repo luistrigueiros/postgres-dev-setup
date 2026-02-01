@@ -169,19 +169,23 @@ docker ps -a     # Check container status
 
 ### Test the Setup
 Step 9: Test the Setup
-bash# Run the setup
-uv run python src/postgres_setup/setup.py setup
-
-# Start PostgreSQL
-uv run python src/postgres_setup/setup.py start
 
 # Check status
-uv run python src/postgres_setup/setup.py status
-
-# Connect to database
 
 ```bash
-uv run python src/postgres_setup/setup.py psql
+./pgctl status
+```
+The output should look like this:
+
+```bash
+📊 PostgreSQL Status (Instance: default, Container: dev-postgres)
+
+NAMES          STATUS                    PORTS
+dev-postgres   Up 51 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+```
+
+```bash
+./pgctl psql
 ```
 
 Inside psql, issue test commands, list extensions
@@ -196,6 +200,27 @@ SELECT version();
 -- Exit
 \q
 ```
+The output should look like this:
+
+```bash
+🔌 Connecting to devdb (Instance: default)...
+
+psql (16.11 (Debian 16.11-1.pgdg13+1))
+Type "help" for help.
+
+devdb=# \dx
+                                     List of installed extensions
+    Name    | Version |   Schema   |                            Description                            
+------------+---------+------------+-------------------------------------------------------------------
+ btree_gin  | 1.3     | public     | support for indexing common datatypes in GIN
+ btree_gist | 1.7     | public     | support for indexing common datatypes in GiST
+ pg_trgm    | 1.6     | public     | text similarity measurement and index searching based on trigrams
+ pgcrypto   | 1.3     | public     | cryptographic functions
+ plpgsql    | 1.0     | pg_catalog | PL/pgSQL procedural language
+(5 rows)
+
+```
+
 
 # Quick Diagnosis
 First, let's check if PostgreSQL is actually accessible:
