@@ -1,12 +1,13 @@
 import time
 
-from . import app, load_config, run_shell_command, show_connection_info, show_extensions
+from . import app, get_instance_name, load_config, run_shell_command, show_connection_info, show_extensions
 
 
 @app.command()
 def restart():
     """Restart PostgreSQL container"""
-    print("🔄 Restarting PostgreSQL...")
+    instance = get_instance_name()
+    print(f"🔄 Restarting PostgreSQL (Instance: {instance})...")
 
     # Stop the container
     stop_success, stop_output = run_shell_command(["docker-compose", "down"], use_build_root=True)

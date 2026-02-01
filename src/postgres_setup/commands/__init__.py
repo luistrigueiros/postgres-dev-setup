@@ -13,12 +13,42 @@ app = typer.Typer(
 
 # project_root is the root of the repository
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-# build_root is where generated files go
-BUILD_ROOT = PROJECT_ROOT / "build"
-CONFIG_FILE = BUILD_ROOT / "config" / "postgres-config.json"
+DEFAULT_INSTANCE = "default"
+
+# Global state for the selected instance
+state = {"pg_instance": DEFAULT_INSTANCE}
+
+@app.callback()
+def main(
+    pg_instance: str = typer.Option(
+        None,
+        "--pg-instance",
+        "-pgi",
+        envvar="PG_INSTANCE",
+        help="Select the PostgreSQL instance to operate on",
+    )
+):
+    if pg_instance:
+        state["pg_instance"] = pg_instance
+
+def get_instance_name() -> str:
+    return state["pg_instance"]
+
+def get_build_root() -> Path:
+    """Return the build root for the current instance"""
+    instance = get_instance_name()
+    if instance == DEFAULT_INSTANCE:
+        return PROJECT_ROOT / "build" / "DEFAULT"
+    return PROJECT_ROOT / "build" / instance
+
+def get_config_file() -> Path:
+    """Return the configuration file path for the current instance"""
+    return get_build_root() / "config" / "postgres-config.json"
 
 def get_default_config() -> Dict[str, Any]:
     """Default PostgreSQL configuration"""
+    instance = get_instance_name()
+    container_name = "dev-postgres" if instance == DEFAULT_INSTANCE else f"dev-postgres-{instance}"
     return {
         "image": "postgres:16",
         "user": "devuser",
@@ -32,22 +62,24 @@ def get_default_config() -> Dict[str, Any]:
             "pgcrypto",  # Cryptographic functions
         ],
         "custom_types": [],
-        "container_name": "dev-postgres",
+        "container_name": container_name,
     }
 
 def load_config() -> Dict[str, Any]:
     """Load PostgreSQL configuration from JSON file"""
-    if not CONFIG_FILE.exists():
+    config_file = get_config_file()
+    if not config_file.exists():
         return get_default_config()
 
-    with open(CONFIG_FILE) as f:
+    with open(config_file) as f:
         return json.load(f)
 
 def run_shell_command(
     cmd: list[str], capture_output: bool = True, use_build_root: bool = False
 ) -> Tuple[bool, str]:
     """Execute shell command and return success status and output"""
-    cwd = BUILD_ROOT if use_build_root else PROJECT_ROOT
+    build_root = get_build_root()
+    cwd = build_root if use_build_root else PROJECT_ROOT
 
     # Ensure directory exists if we're using it as CWD
     if use_build_root:
@@ -72,8 +104,9 @@ def run_shell_command(
 def show_connection_info():
     """Display connection information"""
     config = load_config()
+    instance = get_instance_name()
     print("\n" + "=" * 60)
-    print("📋 Connection Information")
+    print(f"📋 Connection Information (Instance: {instance})")
     print("=" * 60)
     print("  Host:     localhost")
     print(f"  Port:     {config['port']}")

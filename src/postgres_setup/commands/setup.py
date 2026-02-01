@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from . import BUILD_ROOT, CONFIG_FILE, app, load_config
+from . import PROJECT_ROOT, app, get_build_root, get_config_file, load_config
 
 
 def _save_config(config_file: Path, config: dict) -> None:
@@ -96,16 +96,20 @@ def setup():
     print("🚀 Setting up PostgreSQL development environment\n")
 
     config = load_config()
-    _save_config(CONFIG_FILE, config)
-    print(f"✓ Configuration saved to {CONFIG_FILE}")
+    config_file = get_config_file()
+    build_root = get_build_root()
 
-    _generate_docker_compose(BUILD_ROOT, config)
-    _generate_init_scripts(BUILD_ROOT, config)
+    _save_config(config_file, config)
+    print(f"✓ Configuration saved to {config_file}")
+
+    _generate_docker_compose(build_root, config)
+    _generate_init_scripts(build_root, config)
 
     print("\n" + "=" * 60)
     print("✅ Setup complete!")
     print("=" * 60)
     print("\nNext steps:")
-    print("  1. Review build/config/postgres-config.json to customize")
+    root = PROJECT_ROOT if "PROJECT_ROOT" in globals() else Path.cwd()
+    print(f"  1. Review {config_file.relative_to(root)} to customize")
     print("  2. Run: pgctl start")
     print("  3. Connect with: pgctl psql")
