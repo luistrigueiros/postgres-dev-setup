@@ -1,6 +1,20 @@
 [project]
 name = "postgres-dev-setup"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.14"
+description = "PostgreSQL Development Environment Manager"
+requires-python = ">=3.12"
 dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-mock>=3.12.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
