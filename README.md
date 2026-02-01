@@ -10,6 +10,7 @@ Automated PostgreSQL setup for local development with Docker, Python, and UV.
 - 🚀 Automated setup and teardown
 - 📦 Version-controlled configuration
 - 🔄 Easy backup and restore workflows
+- 👯 Multi-instance support (run multiple isolated DBs)
 
 ## Quick Start
 ```bash
@@ -47,6 +48,7 @@ Or use the convenience wrapper:
 | `psql` | Connect with psql client |
 | `status` | Show container status |
 | `info` | Display connection information |
+| `--pg-instance` | Global option to specify instance name (e.g., `--pg-instance analytics`) |
 
 ## Configuration
 
@@ -97,6 +99,24 @@ See [Configuration Guide](docs/CONFIGURATION.md) for details.
 ./pgctl info     # Connection details
 ./pgctl logs     # View logs
 ```
+
+## Multi-Instance Support
+
+You can run multiple isolated PostgreSQL instances by using the `--pg-instance` (or `-pgi`) option. Each instance has its own configuration and data.
+
+```bash
+# Setup and start a separate instance named 'analytics'
+./pgctl --pg-instance analytics setup
+./pgctl --pg-instance analytics start
+
+# Check status of the analytics instance
+./pgctl -pgi analytics status
+
+# Connect to the analytics instance
+./pgctl -pgi analytics psql
+```
+
+Instances are stored in the `build/` directory (e.g., `build/analytics/`).
 
 ## Connection Details
 

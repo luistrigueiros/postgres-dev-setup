@@ -23,8 +23,7 @@ To enable vector similarity search:
   "image": "pgvector/pgvector:pg16",
   "extensions": [
     "vector",
-    "pg_trgm",
-    ...
+    "pg_trgm"
   ]
 }
 ```
@@ -49,13 +48,29 @@ SQL scripts in `init-scripts/` are automatically executed when the database is f
 
 You can add more `*.sql` files - they execute in alphabetical order.
 
-## Environment-Specific Configs
+## Multi-Instance Configuration
 
-For multiple environments:
-```bash
-cp config/postgres-config.json config/postgres-config.dev.json
-cp config/postgres-config.json config/postgres-config.staging.json
+The tool supports multiple isolated PostgreSQL instances via the `--pg-instance` flag.
 
-# Use different configs
-cp config/postgres-config.dev.json config/postgres-config.json
-```
+### How it works
+
+When you specify an instance name (e.g., `./pgctl --pg-instance myapp setup`):
+
+1.  A build directory is created at `build/myapp/`.
+2.  A local configuration file is created at `build/myapp/config/postgres-config.json`.
+3.  Init scripts are generated in `build/myapp/init-scripts/`.
+4.  The Docker container is named `dev-postgres-myapp` (unless overridden in config).
+
+### Port Management
+
+When running multiple instances simultaneously, you **must** assign unique host ports in their respective configuration files.
+
+1.  Initialize the instance: `./pgctl --pg-instance app2 setup`
+2.  Edit `build/app2/config/postgres-config.json`:
+    ```json
+    {
+      "port": 5433,
+      "container_name": "dev-postgres-app2"
+    }
+    ```
+3.  Start the instance: `./pgctl --pg-instance app2 start`
