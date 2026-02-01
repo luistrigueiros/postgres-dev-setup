@@ -1,7 +1,7 @@
 import sys
 import time
 
-from . import app, load_config, run_shell_command, show_connection_info, show_extensions, get_instance_name
+from . import app, get_instance_name, load_config, run_shell_command, show_connection_info, show_extensions
 
 
 @app.command()

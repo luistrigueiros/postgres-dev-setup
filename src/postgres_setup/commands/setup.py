@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from . import app, load_config, get_build_root, get_config_file, PROJECT_ROOT
+from . import PROJECT_ROOT, app, get_build_root, get_config_file, load_config
 
 
 def _save_config(config_file: Path, config: dict) -> None:
@@ -109,6 +109,7 @@ def setup():
     print("✅ Setup complete!")
     print("=" * 60)
     print("\nNext steps:")
-    print(f"  1. Review {config_file.relative_to(PROJECT_ROOT if 'PROJECT_ROOT' in globals() else Path.cwd())} to customize")
+    root = PROJECT_ROOT if "PROJECT_ROOT" in globals() else Path.cwd()
+    print(f"  1. Review {config_file.relative_to(root)} to customize")
     print("  2. Run: pgctl start")
     print("  3. Connect with: pgctl psql")

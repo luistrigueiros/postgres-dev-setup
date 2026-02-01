@@ -1,4 +1,4 @@
-from . import app, run_shell_command, get_instance_name
+from . import app, get_instance_name, run_shell_command
 
 
 @app.command()

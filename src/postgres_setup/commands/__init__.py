@@ -1,8 +1,7 @@
-import os
 import json
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Tuple, Optional
+from typing import Any, Dict, Tuple
 
 import typer
 
