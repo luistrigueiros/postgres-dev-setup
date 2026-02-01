@@ -1,39 +1,12 @@
 
-import json
 import subprocess
-from pathlib import Path
+
+from postgres_setup.commands import Command
 
 
-class PostgresDevSetup:
+class PostgresDevSetup(Command):
     def __init__(self):
-        self.project_root = Path(__file__).parent.parent.parent
-        self.config_file = self.project_root / "config" / "postgres-config.json"
-
-    def load_config(self) -> dict:
-        """Load PostgreSQL configuration from JSON file"""
-        if not self.config_file.exists():
-            return self.default_config()
-
-        with open(self.config_file) as f:
-            return json.load(f)
-
-    def default_config(self) -> dict:
-        """Default PostgreSQL configuration"""
-        return {
-            "image": "postgres:16",
-            "user": "devuser",
-            "password": "devpass",
-            "database": "devdb",
-            "port": 5432,
-            "extensions": [
-                "pg_trgm",  # Text search
-                "btree_gin",  # Additional index types
-                "btree_gist",  # Additional index types
-                "pgcrypto",  # Cryptographic functions
-            ],
-            "custom_types": [],
-            "container_name": "dev-postgres"
-        }
+        super().__init__(name="__postgres_dev_setup__", description="Internal helper")
 
     def run_command(self, cmd: list[str], capture_output: bool = True) -> tuple[bool, str]:
         """Execute shell command and return success status and output"""
