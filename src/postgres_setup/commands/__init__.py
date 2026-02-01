@@ -104,35 +104,35 @@ def run_shell_command(
 
 def show_connection_info():
     """Display connection information"""
-    config = get_config()
+    pg_config = get_config()
     instance = get_instance_name()
     print("\n" + "=" * 60)
     print(f"📋 Connection Information (Instance: {instance})")
     print("=" * 60)
     print("  Host:     localhost")
-    print(f"  Port:     {config.port}")
-    print(f"  Database: {config.database}")
-    print(f"  User:     {config.user}")
-    print(f"  Password: {config.password}")
+    print(f"  Port:     {pg_config.port}")
+    print(f"  Database: {pg_config.database}")
+    print(f"  User:     {pg_config.user}")
+    print(f"  Password: {pg_config.password}")
     print("\n  Connection URI:")
     print(
-        f"  postgresql://{config.user}:{config.password}@localhost:{config.port}/{config.database}"
+        f"  postgresql://{pg_config.user}:{pg_config.password}@localhost:{pg_config.port}/{pg_config.database}"
     )
     print("=" * 60)
 
 def show_extensions():
     """Show installed extensions"""
-    config = get_config()
+    pg_config = get_config()
     success, output = run_shell_command(
         [
             "docker",
             "exec",
-            config.container_name,
+            pg_config.container_name,
             "psql",
             "-U",
-            config.user,
+            pg_config.user,
             "-d",
-            config.database,
+            pg_config.database,
             "-c",
             "SELECT extname, extversion FROM pg_extension ORDER BY extname;",
         ]
@@ -147,12 +147,12 @@ def handle_successful_start():
     print("✓ PostgreSQL container started")
     print("\n⏳ Waiting for PostgreSQL to be healthy...")
 
-    config = get_config()
+    pg_config = get_config()
     for i in range(30):
         time.sleep(1)
         success, _ = run_shell_command([
-            "docker", "exec", config.container_name,
-            "pg_isready", "-U", config.user
+            "docker", "exec", pg_config.container_name,
+            "pg_isready", "-U", pg_config.user
         ])
         if success:
             print("✅ PostgreSQL is ready!")
@@ -163,6 +163,7 @@ def handle_successful_start():
 
     print("\n⚠️  PostgreSQL may still be starting. Check with: pgctl logs")
 
+from . import config as config  # noqa: E402
 from . import destroy as destroy  # noqa: E402
 from . import info as info  # noqa: E402
 from . import logs as logs  # noqa: E402
