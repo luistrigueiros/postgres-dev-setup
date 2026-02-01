@@ -1,13 +1,8 @@
-from argparse import Namespace
-
-from . import Command
+from . import app, run_shell_command
 
 
-class LogsCommand(Command):
-    def __init__(self):
-        super().__init__("logs", "Show PostgreSQL logs")
-
-    def run(self, args: Namespace):
-        """Show PostgreSQL logs"""
-        print("📜 Showing PostgreSQL logs (Ctrl+C to exit)...\n")
-        self.run_command(["docker-compose", "logs", "-f", "postgres"], capture_output=False, use_build_root=True)
+@app.command()
+def logs():
+    """Show PostgreSQL logs"""
+    print("📜 Showing PostgreSQL logs (Ctrl+C to exit)...\n")
+    run_shell_command(["docker-compose", "logs", "-f", "postgres"], capture_output=False, use_build_root=True)

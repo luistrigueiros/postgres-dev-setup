@@ -1,13 +1,7 @@
-
-from argparse import Namespace
-
-from . import Command
+from . import app, show_connection_info
 
 
-class InfoCommand(Command):
-    def __init__(self):
-        super().__init__("info", "Show connection information")
-
-    def run(self, args: Namespace):
-        """Display connection information"""
-        self.show_connection_info()
+@app.command()
+def info():
+    """Show connection information"""
+    show_connection_info()
