@@ -1,13 +1,14 @@
 import sys
 import time
 
-from . import app, load_config, run_shell_command, show_connection_info, show_extensions
+from . import app, load_config, run_shell_command, show_connection_info, show_extensions, get_instance_name
 
 
 @app.command()
 def start():
     """Start PostgreSQL container"""
-    print("🐘 Starting PostgreSQL...")
+    instance = get_instance_name()
+    print(f"🐘 Starting PostgreSQL (Instance: {instance})...")
 
     success, output = run_shell_command(["docker-compose", "up", "-d"], use_build_root=True)
 

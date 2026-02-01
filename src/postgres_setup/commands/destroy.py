@@ -1,15 +1,16 @@
-from . import app, run_shell_command
+from . import app, run_shell_command, get_instance_name
 
 
 @app.command()
 def destroy():
     """Stop and remove all data (⚠️ destructive)"""
-    confirm = input("⚠️  This will DELETE ALL DATA. Type 'yes' to confirm: ")
+    instance = get_instance_name()
+    confirm = input(f"⚠️  This will DELETE ALL DATA for instance '{instance}'. Type 'yes' to confirm: ")
     if confirm.lower() != 'yes':
         print("❌ Aborted")
         return
 
-    print("💥 Destroying PostgreSQL (including data)...")
+    print(f"💥 Destroying PostgreSQL (Instance: {instance}, including data)...")
     success, output = run_shell_command(["docker-compose", "down", "-v"], use_build_root=True)
 
     if success:
