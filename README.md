@@ -98,22 +98,6 @@ See [Configuration Guide](docs/CONFIGURATION.md) for details.
 ./pgctl logs     # View logs
 ```
 
-## Project Structure
-
-.
-├── config/
-│   └── postgres-config.json    # Main configuration
-├── src/
-│   └── postgres_setup/
-│       ├── init.py
-│       └── setup.py            # Main script
-├── init-scripts/               # Generated SQL (gitignored)
-├── docs/
-│   └── CONFIGURATION.md        # Detailed config docs
-├── docker-compose.yml          # Generated Docker config
-├── pgctl                       # Convenience wrapper
-└── README.md
-
 ## Connection Details
 
 After starting, connect with your favorite tool:
@@ -175,9 +159,15 @@ uv run python src/postgres_setup/setup.py start
 uv run python src/postgres_setup/setup.py status
 
 # Connect to database
+
+```bash
 uv run python src/postgres_setup/setup.py psql
-Inside psql, test:
-sql-- List extensions
+```
+
+Inside psql, issue test commands, list extensions
+
+```bash
+
 \dx
 
 -- Check version
@@ -185,27 +175,28 @@ SELECT version();
 
 -- Exit
 \q
+```
 
-### Quick Diagnosis
+# Quick Diagnosis
 First, let's check if PostgreSQL is actually accessible:
-bash# Test 1: Check if port is listening
+
+## Test 1: Check if port is listening
+```bash
 lsof -i :5432
+```
 
-# Test 2: Try connecting with psql from your Mac (not Docker)
-# Install postgresql client if needed: brew install postgresql
+## Test 2: Try connecting with psql from your Mac (not Docker)
+
+Install postgresql client if needed: 
+```bash
+brew install postgresql
 psql -h localhost -p 5432 -U devuser -d devdb
+```
 
-# Test 3: Test with netcat
+## Test 3: Test with netcat
+```bash
 nc -zv localhost 5432
-
-## Contributing
-
-This is a template - customize it for your needs! Common customizations:
-
-- Add migration tools (Alembic, Flyway)
-- Include backup/restore scripts
-- Add monitoring (pgAdmin, pg_stat_statements)
-- Configure replication for testing
+```
 
 
 ## License
